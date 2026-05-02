@@ -1,6 +1,6 @@
 [package]
 name = "floating-memo"
-version = "0.1.0"
+version = "0.2.0"
 description = "Always-on-top desktop sticky memo for Windows"
 authors = ["FloatingMemo"]
 edition = "2021"
