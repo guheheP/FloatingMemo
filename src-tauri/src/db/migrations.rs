@@ -1,7 +1,7 @@
 use crate::error::AppResult;
 use rusqlite::Connection;
 
-const LATEST_VERSION: i64 = 3;
+const LATEST_VERSION: i64 = 4;
 
 pub fn run(conn: &Connection) -> AppResult<()> {
     let current = current_version(conn)?;
@@ -14,6 +14,9 @@ pub fn run(conn: &Connection) -> AppResult<()> {
     }
     if current < 3 {
         apply_v3(conn)?;
+    }
+    if current < 4 {
+        apply_v4(conn)?;
     }
 
     set_version(conn, LATEST_VERSION)?;
@@ -59,6 +62,20 @@ fn apply_v3(conn: &Connection) -> AppResult<()> {
     conn.execute_batch(
         "CREATE INDEX IF NOT EXISTS idx_notes_note_date
             ON notes(note_date) WHERE note_date IS NOT NULL;",
+    )?;
+    Ok(())
+}
+
+fn apply_v4(conn: &Connection) -> AppResult<()> {
+    if !column_exists(conn, "notes", "due_at")? {
+        conn.execute_batch("ALTER TABLE notes ADD COLUMN due_at INTEGER NULL")?;
+    }
+    if !column_exists(conn, "notes", "done_at")? {
+        conn.execute_batch("ALTER TABLE notes ADD COLUMN done_at INTEGER NULL")?;
+    }
+    conn.execute_batch(
+        "CREATE INDEX IF NOT EXISTS idx_notes_kind_due
+            ON notes(kind, done_at, due_at) WHERE kind = 'todo';",
     )?;
     Ok(())
 }
@@ -113,6 +130,8 @@ mod tests {
         assert!(column_exists(&conn, "notes", "kind").unwrap());
         assert!(column_exists(&conn, "notes", "sort_order").unwrap());
         assert!(column_exists(&conn, "notes", "note_date").unwrap());
+        assert!(column_exists(&conn, "notes", "due_at").unwrap());
+        assert!(column_exists(&conn, "notes", "done_at").unwrap());
 
         let (id, content, kind): (String, String, String) = conn
             .query_row(
@@ -142,7 +161,9 @@ mod tests {
                 title       TEXT NOT NULL DEFAULT '',
                 kind        TEXT NOT NULL DEFAULT 'memo',
                 sort_order  INTEGER NOT NULL DEFAULT 0,
-                note_date   TEXT NULL
+                note_date   TEXT NULL,
+                due_at      INTEGER NULL,
+                done_at     INTEGER NULL
             );",
         )
         .unwrap();

@@ -13,6 +13,8 @@ export interface Note {
   sort_order: number;
   tags: string[];
   note_date: string | null;
+  due_at: number | null;
+  done_at: number | null;
 }
 
 export function loadDefaultNote(): Promise<Note> {
@@ -61,4 +63,16 @@ export function setNoteDate(id: string, date: string | null): Promise<Note> {
 
 export function listNotesByMonth(yearMonth: string): Promise<Note[]> {
   return invoke<Note[]>("list_notes_by_month", { yearMonth });
+}
+
+export function listNotesByKind(kind: NoteKind): Promise<Note[]> {
+  return invoke<Note[]>("list_notes_by_kind", { kind });
+}
+
+export function setNoteDone(id: string, done: boolean): Promise<Note> {
+  return invoke<Note>("set_note_done", { id, done });
+}
+
+export function setNoteDueAt(id: string, dueAt: number | null): Promise<Note> {
+  return invoke<Note>("set_note_due_at", { id, dueAt });
 }

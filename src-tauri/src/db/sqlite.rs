@@ -6,7 +6,7 @@ use std::sync::Mutex;
 use uuid::Uuid;
 
 const SELECT_COLS: &str =
-    "id, title, kind, content, created_at, updated_at, pinned, sort_order, tags, note_date";
+    "id, title, kind, content, created_at, updated_at, pinned, sort_order, tags, note_date, due_at, done_at";
 
 const SCHEMA_SQL: &str = r#"
 CREATE TABLE IF NOT EXISTS notes (
@@ -83,6 +83,8 @@ fn row_to_note(row: &rusqlite::Row<'_>) -> rusqlite::Result<Note> {
         sort_order: row.get("sort_order")?,
         tags,
         note_date: row.get("note_date")?,
+        due_at: row.get("due_at")?,
+        done_at: row.get("done_at")?,
     })
 }
 
@@ -230,6 +232,63 @@ impl NoteRepository for SqliteNoteRepository {
                 row_to_note,
             )
             .map_err(|_| AppError::NotFound(id.to_string()))?;
+        Ok(note)
+    }
+
+    fn list_by_kind(&self, kind: &str) -> AppResult<Vec<Note>> {
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(&format!(
+            "SELECT {SELECT_COLS} FROM notes
+             WHERE kind = ?1
+             ORDER BY
+                CASE WHEN done_at IS NULL THEN 0 ELSE 1 END,
+                CASE WHEN due_at IS NULL THEN 1 ELSE 0 END,
+                due_at ASC,
+                pinned DESC,
+                updated_at DESC"
+        ))?;
+        let rows = stmt.query_map(params![kind], row_to_note)?;
+        let mut out = Vec::new();
+        for r in rows {
+            out.push(r?);
+        }
+        Ok(out)
+    }
+
+    fn set_done(&self, id: &str, done: bool) -> AppResult<Note> {
+        let conn = self.lock_conn()?;
+        let now = chrono::Utc::now().timestamp_millis();
+        let done_at: Option<i64> = if done { Some(now) } else { None };
+        let n = conn.execute(
+            "UPDATE notes SET done_at = ?1, updated_at = ?2 WHERE id = ?3",
+            params![done_at, now, id],
+        )?;
+        if n == 0 {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let note = conn.query_row(
+            &format!("SELECT {SELECT_COLS} FROM notes WHERE id = ?1"),
+            params![id],
+            row_to_note,
+        )?;
+        Ok(note)
+    }
+
+    fn set_due_at(&self, id: &str, due_at: Option<i64>) -> AppResult<Note> {
+        let conn = self.lock_conn()?;
+        let now = chrono::Utc::now().timestamp_millis();
+        let n = conn.execute(
+            "UPDATE notes SET due_at = ?1, updated_at = ?2 WHERE id = ?3",
+            params![due_at, now, id],
+        )?;
+        if n == 0 {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let note = conn.query_row(
+            &format!("SELECT {SELECT_COLS} FROM notes WHERE id = ?1"),
+            params![id],
+            row_to_note,
+        )?;
         Ok(note)
     }
 
@@ -409,6 +468,44 @@ mod tests {
         assert!(cleared.note_date.is_none());
         let listed2 = repo.list_by_month("2026-05").unwrap();
         assert!(listed2.is_empty());
+    }
+
+    #[test]
+    fn todo_done_and_due_round_trip() {
+        let (_dir, repo) = make_repo();
+        let t = repo.create_note("買い物", "todo").unwrap();
+        assert!(t.done_at.is_none());
+        assert!(t.due_at.is_none());
+
+        let updated = repo.set_due_at(&t.id, Some(1746162000000)).unwrap();
+        assert_eq!(updated.due_at, Some(1746162000000));
+
+        let done = repo.set_done(&t.id, true).unwrap();
+        assert!(done.done_at.is_some());
+
+        let undone = repo.set_done(&t.id, false).unwrap();
+        assert!(undone.done_at.is_none());
+    }
+
+    #[test]
+    fn list_by_kind_filters_and_sorts() {
+        let (_dir, repo) = make_repo();
+        let _ = repo.get_or_create_default().unwrap();
+        let _ = repo.create_note("普通メモ", "memo").unwrap();
+        let a = repo.create_note("タスクA", "todo").unwrap();
+        let b = repo.create_note("タスクB", "todo").unwrap();
+        let _ = repo.set_due_at(&a.id, Some(2_000_000_000_000)).unwrap();
+        let _ = repo.set_due_at(&b.id, Some(1_000_000_000_000)).unwrap();
+        let _ = repo.set_done(&b.id, true).unwrap();
+
+        let list = repo.list_by_kind("todo").unwrap();
+        assert_eq!(list.len(), 2);
+        // pending first (a), then done (b)
+        assert_eq!(list[0].id, a.id);
+        assert_eq!(list[1].id, b.id);
+
+        let memos = repo.list_by_kind("memo").unwrap();
+        assert!(memos.iter().all(|n| n.kind == "memo"));
     }
 
     #[test]

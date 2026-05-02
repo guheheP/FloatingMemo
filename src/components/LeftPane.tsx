@@ -1,8 +1,9 @@
 import CalendarView from "./CalendarView";
 import Sidebar from "./Sidebar";
+import TodoView from "./TodoView";
 import type { Note } from "../api/notes";
 
-export type LeftPaneMode = "memo" | "calendar";
+export type LeftPaneMode = "memo" | "calendar" | "todo";
 
 interface LeftPaneProps {
   mode: LeftPaneMode;
@@ -41,17 +42,25 @@ export default function LeftPane({
   return (
     <aside className={`left-pane left-pane-${mode}`}>
       <div className="left-pane-content">
-        {mode === "memo" ? (
+        {mode === "memo" && (
           <Sidebar
-            notes={notes}
+            notes={notes.filter((n) => n.kind === "memo")}
             selectedId={selectedId}
             onSelect={onSelect}
             onNotesChanged={onNotesChanged}
             collapsed={false}
             onToggleCollapsed={onToggleCollapsed}
           />
-        ) : (
+        )}
+        {mode === "calendar" && (
           <CalendarView
+            selectedId={selectedId}
+            onSelect={onSelect}
+            onNotesChanged={onNotesChanged}
+          />
+        )}
+        {mode === "todo" && (
+          <TodoView
             selectedId={selectedId}
             onSelect={onSelect}
             onNotesChanged={onNotesChanged}
@@ -74,6 +83,14 @@ export default function LeftPane({
           onClick={() => onModeChange("calendar")}
         >
           カレンダー
+        </button>
+        <button
+          type="button"
+          className={`bottom-tab ${mode === "todo" ? "is-active" : ""}`}
+          aria-pressed={mode === "todo"}
+          onClick={() => onModeChange("todo")}
+        >
+          TODO
         </button>
       </nav>
     </aside>

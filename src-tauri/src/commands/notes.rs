@@ -93,3 +93,29 @@ pub fn list_notes_by_month(
 ) -> AppResult<Vec<Note>> {
     repo.list_by_month(&year_month)
 }
+
+#[tauri::command]
+pub fn list_notes_by_kind(
+    kind: String,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Vec<Note>> {
+    repo.list_by_kind(&kind)
+}
+
+#[tauri::command]
+pub fn set_note_done(
+    id: String,
+    done: bool,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Note> {
+    repo.set_done(&id, done)
+}
+
+#[tauri::command]
+pub fn set_note_due_at(
+    id: String,
+    due_at: Option<i64>,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Note> {
+    repo.set_due_at(&id, due_at)
+}

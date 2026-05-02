@@ -21,6 +21,8 @@ pub struct Note {
     pub sort_order: i64,
     pub tags: Vec<String>,
     pub note_date: Option<String>,
+    pub due_at: Option<i64>,
+    pub done_at: Option<i64>,
 }
 
 impl Note {
@@ -37,6 +39,8 @@ impl Note {
             sort_order: 0,
             tags: Vec::new(),
             note_date: None,
+            due_at: None,
+            done_at: None,
         }
     }
 }
@@ -53,6 +57,9 @@ pub trait NoteRepository: Send + Sync {
     fn search(&self, query: &str, limit: usize) -> AppResult<Vec<Note>>;
     fn set_note_date(&self, id: &str, date: Option<&str>) -> AppResult<Note>;
     fn list_by_month(&self, year_month: &str) -> AppResult<Vec<Note>>;
+    fn list_by_kind(&self, kind: &str) -> AppResult<Vec<Note>>;
+    fn set_done(&self, id: &str, done: bool) -> AppResult<Note>;
+    fn set_due_at(&self, id: &str, due_at: Option<i64>) -> AppResult<Note>;
 }
 
 pub use settings::{Settings, SettingsRepository, SqliteSettingsRepository};
