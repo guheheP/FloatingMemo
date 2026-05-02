@@ -26,10 +26,7 @@
         "visible": false,
         "transparent": true,
         "shadow": true,
-        "center": true,
-        "windowEffects": {
-          "effects": ["mica"]
-        }
+        "center": true
       }
     ],
     "security": {
