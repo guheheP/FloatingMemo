@@ -6,13 +6,19 @@
   --fg-muted: #5d5d63;
   --accent: #0067c0;
   --accent-soft: rgba(0, 103, 192, 0.16);
+  --accent-glow: 0 0 0 1px rgba(0, 103, 192, 0.22), 0 6px 18px rgba(0, 103, 192, 0.12);
   --border: rgba(0, 0, 0, 0.08);
   --border-strong: rgba(0, 0, 0, 0.14);
-  --hairline-light: rgba(255, 255, 255, 0.55);
-  --layer: rgba(255, 255, 255, 0.45);
-  --layer-soft: rgba(255, 255, 255, 0.25);
-  --status-bg: rgba(255, 255, 255, 0.4);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.18);
+  --hairline-light: rgba(255, 255, 255, 0.6);
+  --rim-light: rgba(255, 255, 255, 0.55);
+  --rim-shadow: rgba(0, 0, 0, 0.06);
+  --layer: rgba(255, 255, 255, 0.5);
+  --layer-soft: rgba(255, 255, 255, 0.28);
+  --layer-deep: rgba(255, 255, 255, 0.7);
+  --glass-tile: rgba(255, 255, 255, 0.35);
+  --glass-tile-hover: rgba(255, 255, 255, 0.55);
+  --status-bg: rgba(255, 255, 255, 0.42);
+  --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.22);
 
   font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont,
     "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
@@ -37,13 +43,19 @@
     --fg-muted: #a8a8b3;
     --accent: #4cc2ff;
     --accent-soft: rgba(76, 194, 255, 0.18);
-    --border: rgba(255, 255, 255, 0.07);
-    --border-strong: rgba(255, 255, 255, 0.14);
-    --hairline-light: rgba(255, 255, 255, 0.08);
-    --layer: rgba(255, 255, 255, 0.04);
-    --layer-soft: rgba(255, 255, 255, 0.025);
-    --status-bg: rgba(20, 20, 22, 0.35);
-    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.28), 0 6px 18px rgba(76, 194, 255, 0.12);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --hairline-light: rgba(255, 255, 255, 0.12);
+    --rim-light: rgba(255, 255, 255, 0.14);
+    --rim-shadow: rgba(0, 0, 0, 0.25);
+    --layer: rgba(255, 255, 255, 0.05);
+    --layer-soft: rgba(255, 255, 255, 0.03);
+    --layer-deep: rgba(255, 255, 255, 0.08);
+    --glass-tile: rgba(255, 255, 255, 0.04);
+    --glass-tile-hover: rgba(255, 255, 255, 0.08);
+    --status-bg: rgba(20, 20, 22, 0.4);
+    --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -55,13 +67,19 @@
   --fg-muted: #a8a8b3;
   --accent: #4cc2ff;
   --accent-soft: rgba(76, 194, 255, 0.18);
-  --border: rgba(255, 255, 255, 0.07);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --hairline-light: rgba(255, 255, 255, 0.08);
-  --layer: rgba(255, 255, 255, 0.04);
-  --layer-soft: rgba(255, 255, 255, 0.025);
-  --status-bg: rgba(20, 20, 22, 0.35);
-  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.28), 0 6px 18px rgba(76, 194, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --hairline-light: rgba(255, 255, 255, 0.12);
+  --rim-light: rgba(255, 255, 255, 0.14);
+  --rim-shadow: rgba(0, 0, 0, 0.25);
+  --layer: rgba(255, 255, 255, 0.05);
+  --layer-soft: rgba(255, 255, 255, 0.03);
+  --layer-deep: rgba(255, 255, 255, 0.08);
+  --glass-tile: rgba(255, 255, 255, 0.04);
+  --glass-tile-hover: rgba(255, 255, 255, 0.08);
+  --status-bg: rgba(20, 20, 22, 0.4);
+  --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 /* When Mica isn't applied (older Win10 / fallback), provide a solid-ish bg */
@@ -142,9 +160,11 @@ body.mica {
   background: linear-gradient(
     180deg,
     transparent 0%,
+    var(--layer) 60%,
     var(--status-bg) 100%
   );
   border-top: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 var(--rim-light);
   user-select: none;
 }
 
@@ -206,9 +226,11 @@ body.mica {
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  /* glass edge: subtle inner highlight that catches Mica's light */
-  box-shadow: inset 0 0 0 1px var(--hairline-light);
-  border-radius: 8px;
+  /* glass edge: rim highlight + subtle 1px inner ring for crystal feel */
+  box-shadow:
+    inset 0 0 0 1px var(--border),
+    inset 0 1px 0 var(--rim-light);
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -310,17 +332,28 @@ body.mica {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
-  transition: background 100ms ease;
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .sidebar-item:hover {
-  background: rgba(127, 127, 127, 0.08);
+  background: var(--glass-tile);
+  border-color: var(--border);
+  box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
 .sidebar-item.is-active {
   background: var(--accent-soft);
+  border-color: rgba(0, 103, 192, 0.35);
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 4px 12px rgba(0, 103, 192, 0.08);
+}
+
+:root[data-theme="dark"] .sidebar-item.is-active,
+:root:not([data-theme="light"]) .sidebar-item.is-active {
+  border-color: rgba(76, 194, 255, 0.35);
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 4px 14px rgba(76, 194, 255, 0.12);
 }
 
 .sidebar-item.is-active .sidebar-item-title {
@@ -424,16 +457,23 @@ body.mica {
 }
 
 .search-panel {
-  width: min(92%, 420px);
+  width: min(92%, 440px);
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--layer);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: linear-gradient(
+    180deg,
+    var(--layer-deep) 0%,
+    var(--layer) 100%
+  );
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  box-shadow: var(--shadow-glass), inset 0 1px 0 var(--hairline-light);
+  border-radius: 12px;
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 1px 0 var(--rim-light),
+    inset 0 -1px 0 var(--rim-shadow);
   overflow: hidden;
 }
 
@@ -469,12 +509,21 @@ body.mica {
 
 .search-result {
   padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease;
 }
 
 .search-result.is-active {
   background: var(--accent-soft);
+  border-color: rgba(0, 103, 192, 0.3);
+  box-shadow: inset 0 1px 0 var(--rim-light);
+}
+
+:root[data-theme="dark"] .search-result.is-active,
+:root:not([data-theme="light"]) .search-result.is-active {
+  border-color: rgba(76, 194, 255, 0.3);
 }
 
 .search-result-title {
@@ -504,8 +553,17 @@ body.mica {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  position: relative;
   border-right: 1px solid var(--border);
-  background: var(--layer-soft);
+  background: linear-gradient(
+    180deg,
+    var(--layer) 0%,
+    var(--layer-soft) 30%,
+    var(--layer-soft) 100%
+  );
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
 .left-pane-calendar {
@@ -525,6 +583,7 @@ body.mica {
   flex: 1;
   border-right: 0;
   background: transparent;
+  box-shadow: none;
 }
 
 .bottom-tabs {
@@ -532,7 +591,13 @@ body.mica {
   display: flex;
   height: 28px;
   border-top: 1px solid var(--border);
-  background: linear-gradient(0deg, var(--layer) 0%, transparent 100%);
+  background: linear-gradient(
+    0deg,
+    var(--layer-deep) 0%,
+    var(--layer) 50%,
+    transparent 100%
+  );
+  box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
 .bottom-tab {
@@ -684,6 +749,12 @@ body.mica {
 
 .calendar-cell.is-selected {
   background: var(--accent-soft);
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 2px 8px rgba(0, 103, 192, 0.12);
+}
+
+:root[data-theme="dark"] .calendar-cell.is-selected,
+:root:not([data-theme="light"]) .calendar-cell.is-selected {
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 2px 10px rgba(76, 194, 255, 0.16);
 }
 
 .calendar-day {
@@ -884,17 +955,28 @@ body.mica {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 6px;
+  border-radius: 7px;
   cursor: pointer;
-  transition: background 100ms ease;
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
 }
 
 .todo-item:hover {
-  background: rgba(127, 127, 127, 0.08);
+  background: var(--glass-tile);
+  border-color: var(--border);
+  box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
 .todo-item.is-active {
   background: var(--accent-soft);
+  border-color: rgba(0, 103, 192, 0.35);
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 4px 12px rgba(0, 103, 192, 0.08);
+}
+
+:root[data-theme="dark"] .todo-item.is-active,
+:root:not([data-theme="light"]) .todo-item.is-active {
+  border-color: rgba(76, 194, 255, 0.35);
+  box-shadow: inset 0 1px 0 var(--rim-light), 0 4px 14px rgba(76, 194, 255, 0.12);
 }
 
 .todo-item.is-active .todo-item-title {
@@ -1169,20 +1251,44 @@ body.mica {
 
 .titlebar {
   flex: 0 0 auto;
-  height: 32px;
+  height: 34px;
   display: flex;
   align-items: stretch;
   justify-content: space-between;
-  background: linear-gradient(
-    180deg,
-    var(--layer) 0%,
-    var(--layer-soft) 60%,
-    transparent 100%
-  );
+  position: relative;
+  background:
+    linear-gradient(
+      180deg,
+      var(--layer-deep) 0%,
+      var(--layer) 40%,
+      var(--layer-soft) 80%,
+      transparent 100%
+    );
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid var(--border);
-  box-shadow: inset 0 1px 0 var(--hairline-light);
+  box-shadow:
+    inset 0 1px 0 var(--rim-light),
+    inset 0 -1px 0 var(--rim-shadow);
   user-select: none;
   -webkit-app-region: drag;
+}
+
+/* glossy top reflection — a faint slick of light right at the very top */
+.titlebar::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--rim-light) 30%,
+    var(--rim-light) 70%,
+    transparent 100%
+  );
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .titlebar-leading {
@@ -1267,14 +1373,21 @@ body.mica {
   position: fixed;
   top: 68px;
   right: 8px;
-  min-width: 220px;
-  padding: 10px 12px;
-  background: var(--layer);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  min-width: 240px;
+  padding: 12px 14px;
+  background: linear-gradient(
+    180deg,
+    var(--layer-deep) 0%,
+    var(--layer) 100%
+  );
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
   border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  box-shadow: var(--shadow-glass), inset 0 1px 0 var(--hairline-light);
+  border-radius: 12px;
+  box-shadow:
+    var(--shadow-glass),
+    inset 0 1px 0 var(--rim-light),
+    inset 0 -1px 0 var(--rim-shadow);
   font-size: 12.5px;
   z-index: 20;
 }
