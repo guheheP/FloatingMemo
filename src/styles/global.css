@@ -602,7 +602,7 @@ body.mica {
 }
 
 .calendar-cell {
-  aspect-ratio: 1 / 1;
+  height: 26px;
   border: 0;
   background: transparent;
   color: var(--fg);
@@ -659,10 +659,10 @@ body.mica {
 }
 
 .calendar-day-section {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  min-height: 60px;
   border-top: 1px solid var(--border);
   padding: 4px 0;
 }
