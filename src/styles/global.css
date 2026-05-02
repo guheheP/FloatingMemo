@@ -1,24 +1,24 @@
 :root {
   --bg: transparent;
   --bg-mica: transparent;
-  --bg-fallback: rgba(245, 245, 247, 0.6);
+  --bg-fallback: rgba(245, 245, 247, 0.4);
   --fg: #1a1a1a;
   --fg-muted: #5d5d63;
   --accent: #0067c0;
-  --accent-soft: rgba(0, 103, 192, 0.16);
-  --accent-glow: 0 0 0 1px rgba(0, 103, 192, 0.22), 0 6px 18px rgba(0, 103, 192, 0.12);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.14);
-  --hairline-light: rgba(255, 255, 255, 0.6);
-  --rim-light: rgba(255, 255, 255, 0.55);
-  --rim-shadow: rgba(0, 0, 0, 0.06);
-  --layer: rgba(255, 255, 255, 0.5);
-  --layer-soft: rgba(255, 255, 255, 0.28);
-  --layer-deep: rgba(255, 255, 255, 0.7);
-  --glass-tile: rgba(255, 255, 255, 0.35);
+  --accent-soft: rgba(0, 103, 192, 0.18);
+  --accent-glow: 0 0 0 1px rgba(0, 103, 192, 0.3), 0 6px 22px rgba(0, 103, 192, 0.22);
+  --border: rgba(0, 0, 0, 0.06);
+  --border-strong: rgba(0, 0, 0, 0.12);
+  --hairline-light: rgba(255, 255, 255, 0.85);
+  --rim-light: rgba(255, 255, 255, 0.95);
+  --rim-shadow: rgba(0, 0, 0, 0.08);
+  --layer: rgba(255, 255, 255, 0.22);
+  --layer-soft: rgba(255, 255, 255, 0.1);
+  --layer-deep: rgba(255, 255, 255, 0.42);
+  --glass-tile: rgba(255, 255, 255, 0.32);
   --glass-tile-hover: rgba(255, 255, 255, 0.55);
-  --status-bg: rgba(255, 255, 255, 0.42);
-  --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.22);
+  --status-bg: rgba(255, 255, 255, 0.16);
+  --shadow-glass: 0 16px 48px rgba(0, 0, 0, 0.28);
 
   font-family: "Segoe UI Variable", "Segoe UI", -apple-system, BlinkMacSystemFont,
     "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", sans-serif;
@@ -38,48 +38,48 @@
   :root:not([data-theme="light"]) {
     --bg: transparent;
     --bg-mica: transparent;
-    --bg-fallback: rgba(24, 24, 28, 0.55);
+    --bg-fallback: rgba(24, 24, 28, 0.4);
     --fg: #f2f2f7;
     --fg-muted: #a8a8b3;
     --accent: #4cc2ff;
-    --accent-soft: rgba(76, 194, 255, 0.18);
-    --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.28), 0 6px 18px rgba(76, 194, 255, 0.12);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
-    --hairline-light: rgba(255, 255, 255, 0.12);
-    --rim-light: rgba(255, 255, 255, 0.14);
-    --rim-shadow: rgba(0, 0, 0, 0.25);
-    --layer: rgba(255, 255, 255, 0.05);
-    --layer-soft: rgba(255, 255, 255, 0.03);
-    --layer-deep: rgba(255, 255, 255, 0.08);
-    --glass-tile: rgba(255, 255, 255, 0.04);
-    --glass-tile-hover: rgba(255, 255, 255, 0.08);
-    --status-bg: rgba(20, 20, 22, 0.4);
-    --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.5);
+    --accent-soft: rgba(76, 194, 255, 0.22);
+    --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.4), 0 6px 22px rgba(76, 194, 255, 0.28);
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --hairline-light: rgba(255, 255, 255, 0.22);
+    --rim-light: rgba(255, 255, 255, 0.32);
+    --rim-shadow: rgba(0, 0, 0, 0.35);
+    --layer: rgba(255, 255, 255, 0.06);
+    --layer-soft: rgba(255, 255, 255, 0.025);
+    --layer-deep: rgba(255, 255, 255, 0.12);
+    --glass-tile: rgba(255, 255, 255, 0.06);
+    --glass-tile-hover: rgba(255, 255, 255, 0.12);
+    --status-bg: rgba(20, 20, 22, 0.18);
+    --shadow-glass: 0 16px 48px rgba(0, 0, 0, 0.55);
   }
 }
 
 :root[data-theme="dark"] {
   --bg: transparent;
   --bg-mica: transparent;
-  --bg-fallback: rgba(24, 24, 28, 0.55);
+  --bg-fallback: rgba(24, 24, 28, 0.4);
   --fg: #f2f2f7;
   --fg-muted: #a8a8b3;
   --accent: #4cc2ff;
-  --accent-soft: rgba(76, 194, 255, 0.18);
-  --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.28), 0 6px 18px rgba(76, 194, 255, 0.12);
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --hairline-light: rgba(255, 255, 255, 0.12);
-  --rim-light: rgba(255, 255, 255, 0.14);
-  --rim-shadow: rgba(0, 0, 0, 0.25);
-  --layer: rgba(255, 255, 255, 0.05);
-  --layer-soft: rgba(255, 255, 255, 0.03);
-  --layer-deep: rgba(255, 255, 255, 0.08);
-  --glass-tile: rgba(255, 255, 255, 0.04);
-  --glass-tile-hover: rgba(255, 255, 255, 0.08);
-  --status-bg: rgba(20, 20, 22, 0.4);
-  --shadow-glass: 0 12px 40px rgba(0, 0, 0, 0.5);
+  --accent-soft: rgba(76, 194, 255, 0.22);
+  --accent-glow: 0 0 0 1px rgba(76, 194, 255, 0.4), 0 6px 22px rgba(76, 194, 255, 0.28);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --hairline-light: rgba(255, 255, 255, 0.22);
+  --rim-light: rgba(255, 255, 255, 0.32);
+  --rim-shadow: rgba(0, 0, 0, 0.35);
+  --layer: rgba(255, 255, 255, 0.06);
+  --layer-soft: rgba(255, 255, 255, 0.025);
+  --layer-deep: rgba(255, 255, 255, 0.12);
+  --glass-tile: rgba(255, 255, 255, 0.06);
+  --glass-tile-hover: rgba(255, 255, 255, 0.12);
+  --status-bg: rgba(20, 20, 22, 0.18);
+  --shadow-glass: 0 16px 48px rgba(0, 0, 0, 0.55);
 }
 
 /* When Mica isn't applied (older Win10 / fallback), provide a solid-ish bg */
@@ -163,6 +163,8 @@ body.mica {
     var(--layer) 60%,
     var(--status-bg) 100%
   );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-top: 1px solid var(--border);
   box-shadow: inset 0 1px 0 var(--rim-light);
   user-select: none;
@@ -466,8 +468,8 @@ body.mica {
     var(--layer-deep) 0%,
     var(--layer) 100%
   );
-  backdrop-filter: blur(36px) saturate(200%);
-  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  backdrop-filter: blur(48px) saturate(240%);
+  -webkit-backdrop-filter: blur(48px) saturate(240%);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   box-shadow:
@@ -561,8 +563,8 @@ body.mica {
     var(--layer-soft) 30%,
     var(--layer-soft) 100%
   );
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
@@ -597,6 +599,8 @@ body.mica {
     var(--layer) 50%,
     transparent 100%
   );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: inset 0 1px 0 var(--rim-light);
 }
 
@@ -1264,8 +1268,8 @@ body.mica {
       var(--layer-soft) 80%,
       transparent 100%
     );
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(28px) saturate(220%);
+  -webkit-backdrop-filter: blur(28px) saturate(220%);
   border-bottom: 1px solid var(--border);
   box-shadow:
     inset 0 1px 0 var(--rim-light),
@@ -1380,8 +1384,8 @@ body.mica {
     var(--layer-deep) 0%,
     var(--layer) 100%
   );
-  backdrop-filter: blur(36px) saturate(200%);
-  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  backdrop-filter: blur(48px) saturate(240%);
+  -webkit-backdrop-filter: blur(48px) saturate(240%);
   border: 1px solid var(--border-strong);
   border-radius: 12px;
   box-shadow:
