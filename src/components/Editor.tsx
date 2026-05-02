@@ -97,6 +97,7 @@ export default function Editor() {
         onChange={(e) => setContent(e.target.value)}
         onBlur={() => flush(content)}
         onKeyDown={(e) => {
+          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (e.key === "Escape") {
             e.preventDefault();
             flush(content);

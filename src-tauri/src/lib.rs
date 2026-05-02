@@ -72,6 +72,8 @@ pub fn run() {
             commands::notes::get_default_note,
             commands::notes::save_note,
             commands::window::hide_window,
+            commands::window::minimize_window,
+            commands::window::toggle_always_on_top,
             commands::settings::load_settings,
             commands::settings::set_setting,
         ])
