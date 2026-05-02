@@ -40,9 +40,13 @@ pub fn toggle(app: &AppHandle) {
 
 #[cfg(target_os = "windows")]
 pub fn apply_mica_effect(window: &WebviewWindow) {
-    use window_vibrancy::apply_mica;
-    if let Err(e) = apply_mica(window, None) {
-        log::warn!("apply_mica failed (non-fatal): {e}");
+    use window_vibrancy::{apply_acrylic, apply_mica};
+    // Try Mica first (Win11 22000+, native look). Fall back to Acrylic
+    // (Win10+) for a stronger frosted-glass appearance if Mica isn't available.
+    if apply_mica(window, None).is_err() {
+        if let Err(e) = apply_acrylic(window, Some((18, 18, 18, 125))) {
+            log::warn!("both apply_mica and apply_acrylic failed (non-fatal): {e}");
+        }
     }
 }
 
