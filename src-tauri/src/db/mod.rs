@@ -1,3 +1,5 @@
+pub mod backup;
+pub mod settings;
 pub mod sqlite;
 
 use crate::error::AppResult;
@@ -35,4 +37,5 @@ pub trait NoteRepository: Send + Sync {
     fn list_all(&self) -> AppResult<Vec<Note>>;
 }
 
+pub use settings::{Settings, SettingsRepository, SqliteSettingsRepository};
 pub use sqlite::SqliteNoteRepository;

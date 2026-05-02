@@ -7,16 +7,26 @@ mod tray;
 mod window;
 
 use crate::commands::notes::NoteRepoState;
-use crate::db::SqliteNoteRepository;
+use crate::commands::settings::SettingsRepoState;
+use crate::db::{SqliteNoteRepository, SqliteSettingsRepository};
 use std::sync::Arc;
 use tauri_plugin_autostart::MacosLauncher;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let db_path = paths::db_path().expect("failed to resolve data directory");
-    let repo = SqliteNoteRepository::new(&db_path)
+    let backups_dir = paths::backups_dir().expect("failed to resolve backups directory");
+    if let Err(e) = db::backup::rotate_and_backup(&db_path, &backups_dir) {
+        log::warn!("startup backup failed (non-fatal): {e}");
+    }
+
+    let note_repo = SqliteNoteRepository::new(&db_path)
         .expect("failed to initialize SQLite note repository");
-    let repo_state: NoteRepoState = Arc::new(repo);
+    let note_state: NoteRepoState = Arc::new(note_repo);
+
+    let settings_repo = SqliteSettingsRepository::new(&db_path)
+        .expect("failed to initialize SQLite settings repository");
+    let settings_state: SettingsRepoState = Arc::new(settings_repo);
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -25,12 +35,16 @@ pub fn run() {
             None,
         ))
         .plugin(hotkey::plugin())
-        .manage(repo_state)
-        .setup(|app| {
+        .manage(note_state)
+        .manage(settings_state.clone())
+        .setup(move |app| {
             tray::setup(app.handle())?;
             hotkey::register(app.handle())?;
             if let Some(main) = window::main_window(app.handle()) {
                 window::apply_mica_effect(&main);
+                if let Ok(settings) = settings_state.load() {
+                    let _ = main.set_always_on_top(settings.always_on_top);
+                }
             }
             #[cfg(debug_assertions)]
             window::show_and_focus(app.handle());
@@ -58,6 +72,8 @@ pub fn run() {
             commands::notes::get_default_note,
             commands::notes::save_note,
             commands::window::hide_window,
+            commands::settings::load_settings,
+            commands::settings::set_setting,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -114,3 +114,85 @@ body.mica {
   color: var(--fg-muted);
   opacity: 0.7;
 }
+
+.settings-trigger {
+  position: fixed;
+  top: 6px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 14px;
+  line-height: 24px;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.55;
+  transition: background 120ms ease, opacity 120ms ease, color 120ms ease;
+  z-index: 10;
+}
+
+.settings-trigger:hover {
+  opacity: 1;
+  background: var(--border);
+  color: var(--fg);
+}
+
+.settings-popover {
+  position: fixed;
+  top: 36px;
+  right: 8px;
+  min-width: 220px;
+  padding: 10px 12px;
+  background: var(--status-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  font-size: 12.5px;
+  z-index: 20;
+}
+
+.settings-row {
+  margin: 6px 0;
+}
+
+.settings-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-row input[type="checkbox"] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.settings-hotkey-hint {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--fg-muted);
+  font-size: 11.5px;
+}
+
+.settings-hotkey-hint kbd {
+  font-family: "Segoe UI Variable", inherit;
+  font-size: 10.5px;
+  padding: 1px 5px;
+  margin: 0 1px;
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.settings-error {
+  margin-top: 8px;
+  color: #d13438;
+  font-size: 11px;
+}
