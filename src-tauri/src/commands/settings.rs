@@ -25,6 +25,16 @@ pub fn set_setting(
     repo.load()
 }
 
+#[tauri::command]
+pub fn set_string_setting(
+    key: String,
+    value: String,
+    repo: State<'_, SettingsRepoState>,
+) -> AppResult<Settings> {
+    repo.set_string(&key, &value)?;
+    repo.load()
+}
+
 fn apply_side_effect(app: &AppHandle, key: &str, value: bool) {
     match key {
         KEY_ALWAYS_ON_TOP => {

@@ -71,11 +71,19 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::notes::get_default_note,
             commands::notes::save_note,
+            commands::notes::list_notes,
+            commands::notes::get_note,
+            commands::notes::create_note,
+            commands::notes::delete_note,
+            commands::notes::save_note_content,
+            commands::notes::update_note_title,
+            commands::notes::set_note_pinned,
             commands::window::hide_window,
             commands::window::minimize_window,
             commands::window::toggle_always_on_top,
             commands::settings::load_settings,
             commands::settings::set_setting,
+            commands::settings::set_string_setting,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,15 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  applyThemeToDom,
   loadSettings,
   setSetting,
+  setTheme,
   type Settings,
   type SettingKey,
+  type Theme,
 } from "../api/settings";
 
 const DEFAULT_SETTINGS: Settings = {
   always_on_top: false,
   autostart: false,
+  theme: "auto",
 };
+
+const THEMES: { value: Theme; label: string }[] = [
+  { value: "auto", label: "自動" },
+  { value: "light", label: "ライト" },
+  { value: "dark", label: "ダーク" },
+];
 
 export default function SettingsPanel() {
   const [open, setOpen] = useState(false);
@@ -19,7 +29,10 @@ export default function SettingsPanel() {
 
   useEffect(() => {
     loadSettings()
-      .then(setSettings)
+      .then((s) => {
+        setSettings(s);
+        applyThemeToDom(s.theme);
+      })
       .catch((e) => setError(String(e)));
   }, []);
 
@@ -45,6 +58,21 @@ export default function SettingsPanel() {
       setError(null);
     } catch (e) {
       setSettings(previous);
+      setError(String(e));
+    }
+  };
+
+  const chooseTheme = async (theme: Theme) => {
+    const previous = settings;
+    setSettings({ ...settings, theme });
+    applyThemeToDom(theme);
+    try {
+      const updated = await setTheme(theme);
+      setSettings(updated);
+      setError(null);
+    } catch (e) {
+      setSettings(previous);
+      applyThemeToDom(previous.theme);
       setError(String(e));
     }
   };
@@ -81,6 +109,25 @@ export default function SettingsPanel() {
               />
               <span>OS 起動時に自動起動</span>
             </label>
+          </div>
+          <div className="settings-theme">
+            <div className="settings-theme-label">テーマ</div>
+            <div className="settings-theme-row" role="radiogroup" aria-label="テーマ">
+              {THEMES.map((t) => (
+                <button
+                  key={t.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={settings.theme === t.value}
+                  className={`settings-theme-btn ${
+                    settings.theme === t.value ? "is-active" : ""
+                  }`}
+                  onClick={() => void chooseTheme(t.value)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="settings-hotkey-hint">
             ホットキー: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Space</kbd>

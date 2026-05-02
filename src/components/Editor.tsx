@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { loadDefaultNote, saveNote } from "../api/notes";
+import { getNote, saveNoteContent } from "../api/notes";
 
 const DEBOUNCE_MS = 500;
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
-export default function Editor() {
+interface EditorProps {
+  noteId: string;
+  onContentChange?: (id: string, content: string) => void;
+}
+
+export default function Editor({ noteId, onContentChange }: EditorProps) {
   const [content, setContent] = useState<string>("");
   const [loaded, setLoaded] = useState<boolean>(false);
   const [status, setStatus] = useState<SaveStatus>("idle");
@@ -15,46 +20,79 @@ export default function Editor() {
   const lastSavedRef = useRef<string>("");
   const timerRef = useRef<number | null>(null);
   const taRef = useRef<HTMLTextAreaElement | null>(null);
+  const currentIdRef = useRef<string>(noteId);
+  const lastContentRef = useRef<string>("");
 
-  useEffect(() => {
-    let cancelled = false;
-    loadDefaultNote()
-      .then((note) => {
-        if (cancelled) return;
-        setContent(note.content);
-        lastSavedRef.current = note.content;
-        setLoaded(true);
-        requestAnimationFrame(() => taRef.current?.focus());
-      })
-      .catch((e) => {
-        if (cancelled) return;
-        setErrorMsg(String(e));
-        setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const flush = (next: string) => {
-    if (next === lastSavedRef.current) {
+  // Synchronous flush: cancel pending timer and persist to a known id.
+  const flushFor = async (id: string, text: string): Promise<void> => {
+    if (timerRef.current !== null) {
+      window.clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (text === lastSavedRef.current && id === currentIdRef.current) {
       setStatus((s) => (s === "saving" ? "saved" : s));
       return;
     }
-    setStatus("saving");
-    saveNote(next)
-      .then((note) => {
+    try {
+      setStatus("saving");
+      const note = await saveNoteContent(id, text);
+      // Only update last-saved tracker if we're still on the same note
+      if (id === currentIdRef.current) {
         lastSavedRef.current = note.content;
         setStatus("saved");
         setErrorMsg(null);
-      })
-      .catch((e) => {
-        setErrorMsg(String(e));
-        setStatus("error");
-      });
+      }
+      onContentChange?.(id, note.content);
+    } catch (e) {
+      setErrorMsg(String(e));
+      setStatus("error");
+    }
   };
 
+  // Load on noteId change. Flush previous note's pending edits first.
   useEffect(() => {
+    let cancelled = false;
+    const previousId = currentIdRef.current;
+    const previousContent = lastContentRef.current;
+    const previousLastSaved = lastSavedRef.current;
+
+    const switchTo = async () => {
+      if (
+        previousId &&
+        previousId !== noteId &&
+        previousContent !== previousLastSaved
+      ) {
+        await flushFor(previousId, previousContent);
+      }
+      try {
+        const note = await getNote(noteId);
+        if (cancelled) return;
+        currentIdRef.current = noteId;
+        setContent(note.content);
+        lastContentRef.current = note.content;
+        lastSavedRef.current = note.content;
+        setLoaded(true);
+        setStatus("saved");
+        setErrorMsg(null);
+        requestAnimationFrame(() => taRef.current?.focus());
+      } catch (e) {
+        if (cancelled) return;
+        setErrorMsg(String(e));
+        setStatus("error");
+      }
+    };
+    setLoaded(false);
+    void switchTo();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteId]);
+
+  // Debounced auto-save while editing the current note.
+  useEffect(() => {
+    lastContentRef.current = content;
     if (!loaded) return;
     if (content === lastSavedRef.current) return;
     setStatus("saving");
@@ -62,7 +100,7 @@ export default function Editor() {
       window.clearTimeout(timerRef.current);
     }
     timerRef.current = window.setTimeout(() => {
-      flush(content);
+      void flushFor(currentIdRef.current, content);
       timerRef.current = null;
     }, DEBOUNCE_MS);
     return () => {
@@ -74,11 +112,16 @@ export default function Editor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, loaded]);
 
+  // Flush on visibility change / beforeunload — don't lose data when hidden.
   useEffect(() => {
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") flush(content);
+      if (document.visibilityState === "hidden") {
+        void flushFor(currentIdRef.current, lastContentRef.current);
+      }
     };
-    const onBeforeUnload = () => flush(content);
+    const onBeforeUnload = () => {
+      void flushFor(currentIdRef.current, lastContentRef.current);
+    };
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => {
@@ -86,7 +129,7 @@ export default function Editor() {
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
+  }, []);
 
   return (
     <div className="editor-root">
@@ -95,12 +138,12 @@ export default function Editor() {
         className="editor-textarea"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        onBlur={() => flush(content)}
+        onBlur={() => void flushFor(currentIdRef.current, content)}
         onKeyDown={(e) => {
           if (e.nativeEvent.isComposing || e.keyCode === 229) return;
           if (e.key === "Escape") {
             e.preventDefault();
-            flush(content);
+            void flushFor(currentIdRef.current, content);
             void invoke("hide_window");
           }
         }}
