@@ -1,7 +1,7 @@
 :root {
   --bg: transparent;
   --bg-mica: transparent;
-  --bg-fallback: rgba(245, 245, 247, 0.4);
+  --bg-fallback: rgba(245, 245, 247, 0.78);
   --fg: #1a1a1a;
   --fg-muted: #5d5d63;
   --accent: #0067c0;
@@ -38,7 +38,7 @@
   :root:not([data-theme="light"]) {
     --bg: transparent;
     --bg-mica: transparent;
-    --bg-fallback: rgba(24, 24, 28, 0.4);
+    --bg-fallback: rgba(24, 24, 28, 0.72);
     --fg: #f2f2f7;
     --fg-muted: #a8a8b3;
     --accent: #4cc2ff;
@@ -245,6 +245,9 @@ body.mica {
   flex-direction: row;
   min-height: 0;
   min-width: 0;
+  background: var(--bg-fallback);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
 
 .app-editor-pane {
@@ -1263,20 +1266,11 @@ body.mica {
   align-items: stretch;
   justify-content: space-between;
   position: relative;
-  background:
-    linear-gradient(
-      180deg,
-      var(--layer-deep) 0%,
-      var(--layer) 40%,
-      var(--layer-soft) 80%,
-      transparent 100%
-    );
-  backdrop-filter: blur(28px) saturate(220%);
-  -webkit-backdrop-filter: blur(28px) saturate(220%);
+  background: var(--layer-soft);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid var(--border);
-  box-shadow:
-    inset 0 1px 0 var(--rim-light),
-    inset 0 -1px 0 var(--rim-shadow);
+  box-shadow: inset 0 1px 0 var(--rim-light);
   user-select: none;
   -webkit-app-region: drag;
 }

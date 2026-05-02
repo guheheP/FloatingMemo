@@ -41,7 +41,9 @@ pub fn run() {
             tray::setup(app.handle())?;
             hotkey::register(app.handle())?;
             if let Some(main) = window::main_window(app.handle()) {
-                window::apply_mica_effect(&main);
+                // Mica/Acrylic を適用しない:
+                // タイトルバーをデスクトップが透ける完全透明にしたいので、
+                // OSレベルの背景レイヤーは無効化する。本文側はCSSで磨りガラス背景を当てる。
                 if let Ok(settings) = settings_state.load() {
                     let _ = main.set_always_on_top(settings.always_on_top);
                 }
