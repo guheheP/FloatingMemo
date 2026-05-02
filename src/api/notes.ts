@@ -12,6 +12,7 @@ export interface Note {
   pinned: boolean;
   sort_order: number;
   tags: string[];
+  note_date: string | null;
 }
 
 export function loadDefaultNote(): Promise<Note> {
@@ -52,4 +53,12 @@ export function setNotePinned(id: string, pinned: boolean): Promise<Note> {
 
 export function searchNotes(query: string, limit = 50): Promise<Note[]> {
   return invoke<Note[]>("search_notes", { query, limit });
+}
+
+export function setNoteDate(id: string, date: string | null): Promise<Note> {
+  return invoke<Note>("set_note_date", { id, date });
+}
+
+export function listNotesByMonth(yearMonth: string): Promise<Note[]> {
+  return invoke<Note[]>("list_notes_by_month", { yearMonth });
 }

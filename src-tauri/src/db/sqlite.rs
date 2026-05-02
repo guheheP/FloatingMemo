@@ -6,7 +6,7 @@ use std::sync::Mutex;
 use uuid::Uuid;
 
 const SELECT_COLS: &str =
-    "id, title, kind, content, created_at, updated_at, pinned, sort_order, tags";
+    "id, title, kind, content, created_at, updated_at, pinned, sort_order, tags, note_date";
 
 const SCHEMA_SQL: &str = r#"
 CREATE TABLE IF NOT EXISTS notes (
@@ -82,6 +82,7 @@ fn row_to_note(row: &rusqlite::Row<'_>) -> rusqlite::Result<Note> {
         pinned: row.get::<_, i64>("pinned")? != 0,
         sort_order: row.get("sort_order")?,
         tags,
+        note_date: row.get("note_date")?,
     })
 }
 
@@ -232,6 +233,40 @@ impl NoteRepository for SqliteNoteRepository {
         Ok(note)
     }
 
+    fn set_note_date(&self, id: &str, date: Option<&str>) -> AppResult<Note> {
+        let conn = self.lock_conn()?;
+        let now = chrono::Utc::now().timestamp_millis();
+        let n = conn.execute(
+            "UPDATE notes SET note_date = ?1, updated_at = ?2 WHERE id = ?3",
+            params![date, now, id],
+        )?;
+        if n == 0 {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let note = conn.query_row(
+            &format!("SELECT {SELECT_COLS} FROM notes WHERE id = ?1"),
+            params![id],
+            row_to_note,
+        )?;
+        Ok(note)
+    }
+
+    fn list_by_month(&self, year_month: &str) -> AppResult<Vec<Note>> {
+        let pattern = format!("{year_month}-%");
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(&format!(
+            "SELECT {SELECT_COLS} FROM notes
+             WHERE note_date LIKE ?1
+             ORDER BY note_date ASC, pinned DESC, updated_at DESC"
+        ))?;
+        let rows = stmt.query_map(params![pattern], row_to_note)?;
+        let mut out = Vec::new();
+        for r in rows {
+            out.push(r?);
+        }
+        Ok(out)
+    }
+
     fn search(&self, query: &str, limit: usize) -> AppResult<Vec<Note>> {
         let trimmed = query.trim();
         if trimmed.is_empty() {
@@ -357,6 +392,35 @@ mod tests {
         let _ = repo.create_note("a", "memo").unwrap();
         let r = repo.search("", 10).unwrap();
         assert!(r.len() >= 2);
+    }
+
+    #[test]
+    fn set_note_date_round_trips_and_unassigns() {
+        let (_dir, repo) = make_repo();
+        let n = repo.create_note("予定", "memo").unwrap();
+        let assigned = repo.set_note_date(&n.id, Some("2026-05-02")).unwrap();
+        assert_eq!(assigned.note_date.as_deref(), Some("2026-05-02"));
+
+        let listed = repo.list_by_month("2026-05").unwrap();
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].id, n.id);
+
+        let cleared = repo.set_note_date(&n.id, None).unwrap();
+        assert!(cleared.note_date.is_none());
+        let listed2 = repo.list_by_month("2026-05").unwrap();
+        assert!(listed2.is_empty());
+    }
+
+    #[test]
+    fn list_by_month_filters_correctly() {
+        let (_dir, repo) = make_repo();
+        let a = repo.create_note("a", "memo").unwrap();
+        let b = repo.create_note("b", "memo").unwrap();
+        let _ = repo.set_note_date(&a.id, Some("2026-04-30")).unwrap();
+        let _ = repo.set_note_date(&b.id, Some("2026-05-15")).unwrap();
+        assert_eq!(repo.list_by_month("2026-04").unwrap().len(), 1);
+        assert_eq!(repo.list_by_month("2026-05").unwrap().len(), 1);
+        assert_eq!(repo.list_by_month("2025-05").unwrap().len(), 0);
     }
 
     #[test]

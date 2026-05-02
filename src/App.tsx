@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Editor from "./components/Editor";
+import LeftPane, { type LeftPaneMode } from "./components/LeftPane";
 import SearchPalette from "./components/SearchPalette";
 import SettingsPanel from "./components/SettingsPanel";
-import Sidebar from "./components/Sidebar";
 import TitleBar from "./components/TitleBar";
 import { createNote, listNotes, type Note } from "./api/notes";
 
@@ -11,6 +11,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const [searchOpen, setSearchOpen] = useState<boolean>(false);
+  const [leftMode, setLeftMode] = useState<LeftPaneMode>("memo");
 
   const notesRef = useRef<Note[]>([]);
   notesRef.current = notes;
@@ -87,7 +88,9 @@ export default function App() {
     <div className="app-shell">
       <TitleBar />
       <main className="app-main">
-        <Sidebar
+        <LeftPane
+          mode={leftMode}
+          onModeChange={setLeftMode}
           notes={notes}
           selectedId={selectedId}
           onSelect={(id) => setSelectedId(id)}

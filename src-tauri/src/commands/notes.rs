@@ -76,3 +76,20 @@ pub fn search_notes(
     let limit = limit.unwrap_or(50).clamp(1, 200);
     repo.search(&query, limit)
 }
+
+#[tauri::command]
+pub fn set_note_date(
+    id: String,
+    date: Option<String>,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Note> {
+    repo.set_note_date(&id, date.as_deref())
+}
+
+#[tauri::command]
+pub fn list_notes_by_month(
+    year_month: String,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Vec<Note>> {
+    repo.list_by_month(&year_month)
+}

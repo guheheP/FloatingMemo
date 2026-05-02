@@ -20,6 +20,7 @@ pub struct Note {
     pub pinned: bool,
     pub sort_order: i64,
     pub tags: Vec<String>,
+    pub note_date: Option<String>,
 }
 
 impl Note {
@@ -35,6 +36,7 @@ impl Note {
             pinned: false,
             sort_order: 0,
             tags: Vec::new(),
+            note_date: None,
         }
     }
 }
@@ -49,6 +51,8 @@ pub trait NoteRepository: Send + Sync {
     fn set_pinned(&self, id: &str, pinned: bool) -> AppResult<Note>;
     fn get_note(&self, id: &str) -> AppResult<Note>;
     fn search(&self, query: &str, limit: usize) -> AppResult<Vec<Note>>;
+    fn set_note_date(&self, id: &str, date: Option<&str>) -> AppResult<Note>;
+    fn list_by_month(&self, year_month: &str) -> AppResult<Vec<Note>>;
 }
 
 pub use settings::{Settings, SettingsRepository, SqliteSettingsRepository};

@@ -1,7 +1,7 @@
 use crate::error::AppResult;
 use rusqlite::Connection;
 
-const LATEST_VERSION: i64 = 2;
+const LATEST_VERSION: i64 = 3;
 
 pub fn run(conn: &Connection) -> AppResult<()> {
     let current = current_version(conn)?;
@@ -11,6 +11,9 @@ pub fn run(conn: &Connection) -> AppResult<()> {
 
     if current < 2 {
         apply_v2(conn)?;
+    }
+    if current < 3 {
+        apply_v3(conn)?;
     }
 
     set_version(conn, LATEST_VERSION)?;
@@ -45,6 +48,17 @@ fn apply_v2(conn: &Connection) -> AppResult<()> {
     conn.execute_batch(
         "CREATE INDEX IF NOT EXISTS idx_notes_kind ON notes(kind);
          CREATE INDEX IF NOT EXISTS idx_notes_pinned_upd ON notes(pinned DESC, updated_at DESC);",
+    )?;
+    Ok(())
+}
+
+fn apply_v3(conn: &Connection) -> AppResult<()> {
+    if !column_exists(conn, "notes", "note_date")? {
+        conn.execute_batch("ALTER TABLE notes ADD COLUMN note_date TEXT NULL")?;
+    }
+    conn.execute_batch(
+        "CREATE INDEX IF NOT EXISTS idx_notes_note_date
+            ON notes(note_date) WHERE note_date IS NOT NULL;",
     )?;
     Ok(())
 }
@@ -86,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    fn migrates_v1_to_v2_preserving_existing_rows() {
+    fn migrates_v1_to_latest_preserving_existing_rows() {
         let dir = tempdir().unwrap();
         let db = dir.path().join("legacy.db");
         create_v1_db(&db);
@@ -94,10 +108,11 @@ mod tests {
         let conn = Connection::open(&db).unwrap();
         run(&conn).unwrap();
 
-        assert_eq!(current_version(&conn).unwrap(), 2);
+        assert_eq!(current_version(&conn).unwrap(), LATEST_VERSION);
         assert!(column_exists(&conn, "notes", "title").unwrap());
         assert!(column_exists(&conn, "notes", "kind").unwrap());
         assert!(column_exists(&conn, "notes", "sort_order").unwrap());
+        assert!(column_exists(&conn, "notes", "note_date").unwrap());
 
         let (id, content, kind): (String, String, String) = conn
             .query_row(
@@ -126,14 +141,16 @@ mod tests {
                 tags        TEXT NOT NULL DEFAULT '[]',
                 title       TEXT NOT NULL DEFAULT '',
                 kind        TEXT NOT NULL DEFAULT 'memo',
-                sort_order  INTEGER NOT NULL DEFAULT 0
-            );
-            PRAGMA user_version = 2;",
+                sort_order  INTEGER NOT NULL DEFAULT 0,
+                note_date   TEXT NULL
+            );",
         )
         .unwrap();
+        conn.execute_batch(&format!("PRAGMA user_version = {LATEST_VERSION};"))
+            .unwrap();
 
         run(&conn).unwrap();
         run(&conn).unwrap();
-        assert_eq!(current_version(&conn).unwrap(), 2);
+        assert_eq!(current_version(&conn).unwrap(), LATEST_VERSION);
     }
 }
