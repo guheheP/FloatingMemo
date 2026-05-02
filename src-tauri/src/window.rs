@@ -22,19 +22,18 @@ pub fn hide(app: &AppHandle) {
 
 pub fn toggle(app: &AppHandle) {
     if let Some(w) = main_window(app) {
-        match w.is_visible() {
-            Ok(true) => {
-                if matches!(w.is_focused(), Ok(true)) {
-                    let _ = w.hide();
-                } else {
-                    let _ = w.set_focus();
-                }
-            }
-            _ => {
-                let _ = w.show();
-                let _ = w.unminimize();
-                let _ = w.set_focus();
-            }
+        let visible = w.is_visible().unwrap_or(false);
+        let minimized = w.is_minimized().unwrap_or(false);
+        let focused = w.is_focused().unwrap_or(false);
+
+        if !visible || minimized {
+            let _ = w.unminimize();
+            let _ = w.show();
+            let _ = w.set_focus();
+        } else if focused {
+            let _ = w.hide();
+        } else {
+            let _ = w.set_focus();
         }
     }
 }
