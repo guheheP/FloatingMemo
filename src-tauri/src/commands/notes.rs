@@ -66,3 +66,13 @@ pub fn set_note_pinned(
 ) -> AppResult<Note> {
     repo.set_pinned(&id, pinned)
 }
+
+#[tauri::command]
+pub fn search_notes(
+    query: String,
+    limit: Option<usize>,
+    repo: State<'_, NoteRepoState>,
+) -> AppResult<Vec<Note>> {
+    let limit = limit.unwrap_or(50).clamp(1, 200);
+    repo.search(&query, limit)
+}

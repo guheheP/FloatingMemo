@@ -48,6 +48,7 @@ pub trait NoteRepository: Send + Sync {
     fn update_title(&self, id: &str, title: &str) -> AppResult<Note>;
     fn set_pinned(&self, id: &str, pinned: bool) -> AppResult<Note>;
     fn get_note(&self, id: &str) -> AppResult<Note>;
+    fn search(&self, query: &str, limit: usize) -> AppResult<Vec<Note>>;
 }
 
 pub use settings::{Settings, SettingsRepository, SqliteSettingsRepository};

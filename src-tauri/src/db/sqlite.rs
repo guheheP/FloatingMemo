@@ -231,6 +231,30 @@ impl NoteRepository for SqliteNoteRepository {
             .map_err(|_| AppError::NotFound(id.to_string()))?;
         Ok(note)
     }
+
+    fn search(&self, query: &str, limit: usize) -> AppResult<Vec<Note>> {
+        let trimmed = query.trim();
+        if trimmed.is_empty() {
+            return self.list_all().map(|v| v.into_iter().take(limit).collect());
+        }
+        // Use LIKE substring match — Japanese-safe and avoids FTS5 tokenizer issues.
+        // Escape % and _ from user input so it stays a literal substring search.
+        let escaped = trimmed.replace('\\', "\\\\").replace('%', "\\%").replace('_', "\\_");
+        let pattern = format!("%{escaped}%");
+        let conn = self.lock_conn()?;
+        let mut stmt = conn.prepare(&format!(
+            "SELECT {SELECT_COLS} FROM notes
+             WHERE title LIKE ?1 ESCAPE '\\' OR content LIKE ?1 ESCAPE '\\'
+             ORDER BY pinned DESC, updated_at DESC
+             LIMIT ?2"
+        ))?;
+        let rows = stmt.query_map(params![pattern, limit as i64], row_to_note)?;
+        let mut out = Vec::new();
+        for r in rows {
+            out.push(r?);
+        }
+        Ok(out)
+    }
 }
 
 
@@ -306,6 +330,42 @@ mod tests {
         assert_eq!(updated.title, "改題");
         let fetched = repo.get_note(&n.id).unwrap();
         assert_eq!(fetched.title, "改題");
+    }
+
+    #[test]
+    fn search_matches_title_and_content_substrings() {
+        let (_dir, repo) = make_repo();
+        let _ = repo.get_or_create_default().unwrap();
+        let a = repo.create_note("買い物リスト", "memo").unwrap();
+        let _ = repo.save_content(&a.id, "牛乳とパン").unwrap();
+        let b = repo.create_note("読書メモ", "memo").unwrap();
+        let _ = repo.save_content(&b.id, "技術書").unwrap();
+
+        let r = repo.search("牛乳", 10).unwrap();
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].id, a.id);
+
+        let r = repo.search("読書", 10).unwrap();
+        assert_eq!(r.len(), 1);
+        assert_eq!(r[0].id, b.id);
+    }
+
+    #[test]
+    fn search_blank_returns_listing() {
+        let (_dir, repo) = make_repo();
+        let _ = repo.get_or_create_default().unwrap();
+        let _ = repo.create_note("a", "memo").unwrap();
+        let r = repo.search("", 10).unwrap();
+        assert!(r.len() >= 2);
+    }
+
+    #[test]
+    fn search_special_chars_are_literal() {
+        let (_dir, repo) = make_repo();
+        let n = repo.create_note("100% pure", "memo").unwrap();
+        let _ = repo.save_content(&n.id, "with literal %").unwrap();
+        let r = repo.search("100%", 10).unwrap();
+        assert_eq!(r.len(), 1);
     }
 
     #[test]

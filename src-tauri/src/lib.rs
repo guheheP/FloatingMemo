@@ -78,6 +78,7 @@ pub fn run() {
             commands::notes::save_note_content,
             commands::notes::update_note_title,
             commands::notes::set_note_pinned,
+            commands::notes::search_notes,
             commands::window::hide_window,
             commands::window::minimize_window,
             commands::window::toggle_always_on_top,

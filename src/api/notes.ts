@@ -49,3 +49,7 @@ export function updateNoteTitle(id: string, title: string): Promise<Note> {
 export function setNotePinned(id: string, pinned: boolean): Promise<Note> {
   return invoke<Note>("set_note_pinned", { id, pinned });
 }
+
+export function searchNotes(query: string, limit = 50): Promise<Note[]> {
+  return invoke<Note[]>("search_notes", { query, limit });
+}

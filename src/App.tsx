@@ -1,14 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Editor from "./components/Editor";
+import SearchPalette from "./components/SearchPalette";
 import SettingsPanel from "./components/SettingsPanel";
 import Sidebar from "./components/Sidebar";
 import TitleBar from "./components/TitleBar";
-import { listNotes, type Note } from "./api/notes";
+import { createNote, listNotes, type Note } from "./api/notes";
 
 export default function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [searchOpen, setSearchOpen] = useState<boolean>(false);
+
+  const notesRef = useRef<Note[]>([]);
+  notesRef.current = notes;
 
   const refreshNotes = useCallback(async () => {
     const list = await listNotes();
@@ -36,16 +41,43 @@ export default function App() {
     };
   }, []);
 
+  const handleNewNote = useCallback(async () => {
+    try {
+      const note = await createNote("", "memo");
+      await refreshNotes();
+      setSelectedId(note.id);
+    } catch (err) {
+      // Surface only as console — UI has no toast yet
+      console.error("create_note failed", err);
+    }
+  }, [refreshNotes]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+      const mod = e.ctrlKey || e.metaKey;
+      if (!mod) return;
+      const k = e.key.toLowerCase();
+      if (k === "b") {
         e.preventDefault();
         setCollapsed((v) => !v);
+      } else if (k === "n") {
+        e.preventDefault();
+        void handleNewNote();
+      } else if (k === "f") {
+        e.preventDefault();
+        setSearchOpen(true);
+      } else if (e.key >= "1" && e.key <= "9") {
+        const idx = parseInt(e.key, 10) - 1;
+        const list = notesRef.current;
+        if (list[idx]) {
+          e.preventDefault();
+          setSelectedId(list[idx].id);
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [handleNewNote]);
 
   const handleContentChange = useCallback(() => {
     void refreshNotes();
@@ -70,6 +102,11 @@ export default function App() {
         </section>
       </main>
       <SettingsPanel />
+      <SearchPalette
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onSelect={(id) => setSelectedId(id)}
+      />
     </div>
   );
 }
