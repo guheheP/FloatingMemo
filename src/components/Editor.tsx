@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { loadDefaultNote, saveNote } from "../api/notes";
 
 const DEBOUNCE_MS = 500;
@@ -95,6 +96,13 @@ export default function Editor() {
         value={content}
         onChange={(e) => setContent(e.target.value)}
         onBlur={() => flush(content)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") {
+            e.preventDefault();
+            flush(content);
+            void invoke("hide_window");
+          }
+        }}
         placeholder="メモを入力..."
         spellCheck={false}
         disabled={!loaded}

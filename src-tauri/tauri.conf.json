@@ -12,14 +12,20 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "FloatingMemo",
-        "width": 480,
+        "width": 460,
         "height": 360,
+        "minWidth": 280,
+        "minHeight": 200,
         "resizable": true,
         "decorations": true,
         "alwaysOnTop": false,
-        "skipTaskbar": false,
-        "visible": true
+        "skipTaskbar": true,
+        "visible": false,
+        "transparent": true,
+        "shadow": true,
+        "center": true
       }
     ],
     "security": {
